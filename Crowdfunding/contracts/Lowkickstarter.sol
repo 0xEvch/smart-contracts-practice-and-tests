@@ -76,6 +76,8 @@ contract Campaign {
 
         pledges[msg.sender] -= _amount;
         pledged -= _amount;
+        (bool success,) = msg.sender.call{value: _amount}("");
+        require(success);
     }
 
     function claim() external {
@@ -85,7 +87,8 @@ contract Campaign {
         require(!claimed);
 
         claimed = true;
-        payable(organizer).transfer(pledged);
+        (bool success,) = organizer.call{value: pledged}("");
+        require(success);
 
         parent.onClaimed(id);
     }
@@ -96,6 +99,7 @@ contract Campaign {
 
         uint refundAmount = pledges[msg.sender];
         pledges[msg.sender] = 0;
-        payable(msg.sender).transfer(refundAmount);
+        (bool success,) = msg.sender.call{value: refundAmount}("");
+        require(success);
     }
 }
